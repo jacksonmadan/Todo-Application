@@ -7,7 +7,7 @@ function ToDoList() {
 
     const addTask = () => {
         if (task !== "") {
-            setTasks([...tasks, { text: task, completed: false }]);
+            setTasks([...tasks, { text: task, completed: false, isEditing: false }]);
             setTask("");
         }
     };
@@ -27,6 +27,26 @@ function ToDoList() {
         setTasks(newTasks);
     };
 
+    const editTask = (index) => {
+        const newTasks = tasks.map((t, i) => {
+            if (i === index) {
+                return { ...t, isEditing: true };
+            }
+            return t;
+        });
+        setTasks(newTasks);
+    };
+
+    const saveTask = (index, newText) => {
+        const newTasks = tasks.map((t, i) => {
+            if (i === index) {
+                return { ...t, text: newText, isEditing: false };
+            }
+            return t;
+        });
+        setTasks(newTasks);
+    };
+
     return (
         <div>
             <h1>To-Do List</h1>
@@ -40,11 +60,28 @@ function ToDoList() {
             <ul>
                 {tasks.map((t, index) => (
                     <li key={index} style={{ textDecoration: t.completed ? 'line-through' : 'none' }}>
-                        {t.text}
-                        <button onClick={() => toggleTask(index)}>
-                            {t.completed ? 'Undo' : 'Complete'}
-                        </button>
-                        <button onClick={() => deleteTask(index)}>Delete</button>
+                        {t.isEditing ? (
+                            <input
+                                type="text"
+                                defaultValue={t.text}
+                                onBlur={(e) => saveTask(index, e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        saveTask(index, e.target.value);
+                                    }
+                                }}
+                                autoFocus
+                            />
+                        ) : (
+                            <>
+                                {t.text}
+                                <button onClick={() => toggleTask(index)}>
+                                    {t.completed ? 'Undo' : 'Complete'}
+                                </button>
+                                <button onClick={() => editTask(index)}>Edit</button>
+                                <button onClick={() => deleteTask(index)}>Delete</button>
+                            </>
+                        )}
                     </li>
                 ))}
             </ul>
